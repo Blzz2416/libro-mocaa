@@ -1,0 +1,529 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex"><style>:root{color-scheme:light}body{margin:0;font:14px system-ui}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>Colección MoCAA en Yucatán</title>
+<style>
+/* Mesa de revisión: el libro a tamaño real sobre una mesa neutra; la interfaz es un instrumento discreto alrededor. */
+:root{
+  --bg:#d9d5cd; --bg2:#c9c4ba; --scene:#7d776f; --table:#4e4944; --fg:#1d1a19; --fg2:#5d5853; --panel:rgba(255,255,255,.78); --panel-br:rgba(0,0,0,.08);
+  --accent:#3e2733; --accent-fg:#ffffff; --ok:#2f7d4f;
+  --font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bg:#1c1a19; --bg2:#121110; --scene:#1a1917; --table:#2e2b28; --fg:#efeae3; --fg2:#a39c94; --panel:rgba(28,26,25,.82); --panel-br:rgba(255,255,255,.1); --accent:#c49363; --accent-fg:#1c1a19; color-scheme:dark } }
+:root[data-theme="dark"]{ --bg:#1c1a19; --bg2:#121110; --scene:#1a1917; --table:#2e2b28; --fg:#efeae3; --fg2:#a39c94; --panel:rgba(28,26,25,.82); --panel-br:rgba(255,255,255,.1); --accent:#c49363; --accent-fg:#1c1a19; color-scheme:dark }
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);overflow:hidden;-webkit-tap-highlight-color:transparent}
+#app{position:fixed;inset:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));box-sizing:border-box}
+canvas#c{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+canvas#c.grabbing{cursor:grabbing}
+.hud{position:absolute;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));pointer-events:none}
+.top{top:calc(14px + env(safe-area-inset-top,0px));display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.title{pointer-events:auto;background:var(--panel);border:1px solid var(--panel-br);backdrop-filter:blur(8px);border-radius:10px;padding:10px 14px;max-width:min(420px,calc(100vw - 32px));box-sizing:border-box}
+.title h1{margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em}
+.title p{margin:4px 0 0;font-size:12px;color:var(--fg2);line-height:1.45}
+.title p b{color:var(--fg);font-weight:500}
+.views{pointer-events:auto;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.btn{pointer-events:auto;appearance:none;border:1px solid var(--panel-br);background:var(--panel);color:var(--fg);backdrop-filter:blur(8px);border-radius:8px;padding:8px 11px;font:500 12.5px/1 var(--font);cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{border-color:var(--fg2)} .btn:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:transparent}
+.btn[disabled]{opacity:.45;cursor:default}
+.bottom{bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;gap:8px}
+.bar{pointer-events:auto;display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--panel-br);backdrop-filter:blur(8px);border-radius:12px;padding:8px 10px;max-width:calc(100vw - 32px);box-sizing:border-box;flex-wrap:wrap;justify-content:center}
+.bar input[type=range]{width:min(320px,42vw);accent-color:var(--accent)}
+.ind{font-size:12.5px;font-variant-numeric:tabular-nums;min-width:11ch;text-align:center;color:var(--fg)}
+.hint{font-size:11.5px;color:var(--fg2);text-align:center;background:var(--panel);border-radius:8px;padding:5px 10px;pointer-events:none}
+#load{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--panel);border:1px solid var(--panel-br);border-radius:10px;padding:12px 16px;font-size:13px;pointer-events:none}
+#load span{display:block;height:3px;background:var(--bg2);border-radius:2px;margin-top:8px;overflow:hidden}
+#load i{display:block;height:100%;width:0;background:var(--accent)}
+@media (max-width:560px){ .title p .ext{display:none} .ind{min-width:9ch} .hint{display:none} }
+@media (prefers-reduced-motion: reduce){ .btn{transition:none} }
+</style>
+<div id="app">
+  <canvas id="c"></canvas>
+  <div class="hud top">
+    <div class="title">
+      <h1>Colección MoCAA en Yucatán · maqueta 3D</h1>
+      <p><b>Tamaño real:</b> 20,96 × 27,94 cm (8,25 × 11 in) · 92 páginas · lomo 5,5 mm · papel blanco 60# · cubierta cartulina 10 pt laminada<span class="ext"><br>Arrastra fuera del libro para girarlo, rueda o pellizco para acercar; agarra una página por el borde y pásala con la mano.</span></p>
+    </div>
+    <div class="views">
+      <span class="btn" style="cursor:default;gap:8px" title="Laminado de la cubierta, se elige al subir el libro a KDP">Cubierta:
+        <button class="btn" id="fMate" style="padding:5px 8px">Mate</button><button class="btn" id="fBrillo" style="padding:5px 8px">Brillante</button></span>
+      <button class="btn" id="vLect" title="Cámara cenital sobre el pliego abierto">Vista de lectura</button>
+      <button class="btn" id="v3d" title="Vista en perspectiva">Vista 3D</button>
+      <button class="btn" id="vFull" title="Pantalla completa">Pantalla completa</button>
+    </div>
+  </div>
+  <div class="hud bottom">
+    <div class="bar">
+      <button class="btn" id="bClose">Cerrar libro</button>
+      <button class="btn" id="bVolt">Ver contracubierta</button>
+      <button class="btn" id="bPrev" aria-label="Página anterior">◀ Anterior</button>
+      <input type="range" id="slider" min="0" max="48" value="0" step="1" aria-label="Posición en el libro">
+      <button class="btn primary" id="bNext" aria-label="Página siguiente">Siguiente ▶</button>
+      <span class="ind" id="ind">Portada</span>
+    </div>
+    <div class="hint" id="hint">Agarra una página por su borde exterior y arrástrala para pasarla · Doble clic: vista de lectura · Flechas ← → · Clic derecho o Shift + arrastrar: desplazar</div>
+  </div>
+  <div id="load">Cargando páginas… <span><i id="loadBar"></i></span></div>
+</div>
+<script src="vendor/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+// ---------- medidas reales (cm) ----------
+const W = 20.955, H = 27.94, NPAGES = 92, LEAVES = NPAGES / 2;
+const TH = 0.5485 / LEAVES;          // grosor de cada hoja (lomo KDP 0,2159 in para 92 pp. color premium)
+const CV = 0.03;                     // grosor de la cartulina de cubierta (10 pt)
+const T = LEAVES * TH;               // grosor del bloque de hojas
+const TS = T + 2 * CV;               // ancho del lomo
+const SEG = 28;                      // segmentos de la hoja para la curvatura
+const PAGE = i => `pages/hi/p${String(i).padStart(3, '0')}.jpg`;
+const PAGE_LO = i => `pages/lo/p${String(i).padStart(3, '0')}.jpg`;
+
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.physicallyCorrectLights = false;
+const maxAniso = renderer.capabilities.getMaxAnisotropy();
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(32, 1, 1, 600);
+
+// ---------- luces y mesa ----------
+const hemi = new THREE.HemisphereLight(0xfaf7f2, 0x6e6861, 0.42); scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xfff3e4, 0.55); sun.position.set(-28, 70, 46); sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048); sun.shadow.camera.near = 10; sun.shadow.camera.far = 200;
+sun.shadow.camera.left = -45; sun.shadow.camera.right = 45; sun.shadow.camera.top = 45; sun.shadow.camera.bottom = -45; sun.shadow.bias = -0.0008; sun.shadow.radius = 3;
+scene.add(sun);
+const fill = new THREE.DirectionalLight(0xe8f0ff, 0.16); fill.position.set(40, 30, -30); scene.add(fill);
+
+// entorno de estudio (techo claro, suelo oscuro, dos ventanas suaves) para que el laminado de la cubierta refleje algo creíble
+function studioEnvironment() {
+  const env = new THREE.Scene(); env.background = new THREE.Color(0x2a2826);
+  const dome = new THREE.Mesh(new THREE.SphereGeometry(60, 32, 16), new THREE.MeshBasicMaterial({ color: 0x3d3a37, side: THREE.BackSide })); env.add(dome);
+  const floor = new THREE.Mesh(new THREE.CircleGeometry(60, 32), new THREE.MeshBasicMaterial({ color: 0x1e1c1a })); floor.rotation.x = -Math.PI / 2; floor.position.y = -8; env.add(floor);
+  const win = (w, h, x, y, z, ry, c) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: c })); m.position.set(x, y, z); m.rotation.y = ry; m.lookAt(0, 0, 0); env.add(m); };
+  win(40, 26, -30, 40, 25, 0, 0xb8b4ae); win(30, 18, 35, 28, -20, 0, 0x8f8b86); win(60, 10, 0, 50, -40, 0, 0xa6a29c);
+  const pm = new THREE.PMREMGenerator(renderer); pm.compileEquirectangularShader(); const t = pm.fromScene(env, 0.03).texture; pm.dispose(); return t;
+}
+scene.environment = studioEnvironment();
+const tableMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.95, metalness: 0, envMapIntensity: 0.2 });
+const table = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), tableMat); table.rotation.x = -Math.PI / 2; table.position.y = -CV - 0.02; table.receiveShadow = true; scene.add(table);
+
+// regla de 30 cm en el borde de la mesa, para la escala
+function rulerTexture() {
+  const c = document.createElement('canvas'); c.width = 3000; c.height = 160; const g = c.getContext('2d');
+  g.fillStyle = 'rgba(0,0,0,0)'; g.fillRect(0, 0, c.width, c.height);
+  g.strokeStyle = '#efeae2'; g.fillStyle = '#efeae2'; g.lineWidth = 3; g.font = '500 34px Inter, Arial, sans-serif'; g.textAlign = 'center';
+  g.beginPath(); g.moveTo(0, 40); g.lineTo(3000, 40); g.stroke();
+  for (let mm = 0; mm <= 300; mm++) { const x = mm * 10; const h = mm % 10 === 0 ? 36 : (mm % 5 === 0 ? 24 : 12); g.lineWidth = mm % 10 === 0 ? 3 : 2; g.beginPath(); g.moveTo(x, 40); g.lineTo(x, 40 + h); g.stroke(); if (mm % 10 === 0) g.fillText(String(mm / 10), x, 128); }
+  g.textAlign = 'left'; g.fillText('cm', 2960 - 40, 128);
+  const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = maxAniso; return t;
+}
+const ruler = new THREE.Mesh(new THREE.PlaneGeometry(30, 1.6), new THREE.MeshBasicMaterial({ map: rulerTexture(), transparent: true, depthWrite: false }));
+ruler.rotation.x = -Math.PI / 2; ruler.position.set(-5, -CV - 0.01, H / 2 + 3.2); scene.add(ruler);
+
+// ---------- texturas ----------
+const loader = new THREE.TextureLoader();
+let pending = 0, done = 0;
+function tex(url, mirror, onload) {
+  pending++;
+  const t = loader.load(url, () => { t.userData.ready = true; done++; progress(); if (onload) onload(t); });
+  t.encoding = THREE.sRGBEncoding; t.anisotropy = maxAniso; t.minFilter = THREE.LinearMipmapLinearFilter; t.generateMipmaps = true;
+  if (mirror) { t.wrapS = THREE.RepeatWrapping; t.repeat.x = -1; t.offset.x = 1; }
+  return t;
+}
+const loadEl = document.getElementById('load'), loadBar = document.getElementById('loadBar');
+function progress() { const f = pending ? done / pending : 1; loadBar.style.width = (f * 100).toFixed(0) + '%'; if (done >= pending) loadEl.hidden = true; }
+
+// grano fino del papel (mapa de relieve procedimental, muy sutil)
+function grainTexture() {
+  const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d'); const img = g.createImageData(256, 256);
+  for (let i = 0; i < img.data.length; i += 4) { const v = 118 + Math.random() * 20; img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255; }
+  g.putImageData(img, 0, 0); const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(60, 80); return t;
+}
+const grain = grainTexture();
+const PAPER_TINT = 0xf4f1eb;   // blanco de papel offset 60#, no blanco de pantalla
+const paper = new THREE.MeshStandardMaterial({ color: PAPER_TINT, roughness: 0.96, metalness: 0, bumpMap: grain, bumpScale: 0.004, envMapIntensity: 0.15 });
+const paperEdge = new THREE.MeshStandardMaterial({ color: 0xeae6df, roughness: 1, metalness: 0, envMapIntensity: 0.1 });
+const boardEdge = new THREE.MeshStandardMaterial({ color: 0xe6e1d9, roughness: 0.9, metalness: 0, envMapIntensity: 0.1 });
+const pageMat = (map, side) => new THREE.MeshStandardMaterial({ map, side, color: PAPER_TINT, roughness: 0.96, metalness: 0, bumpMap: grain, bumpScale: 0.004, envMapIntensity: 0.15 });
+// cubierta laminada (KDP ofrece brillo o mate): material físico con barniz
+const coverMats = [];
+const coverMat = map => { const m = new THREE.MeshPhysicalMaterial({ map, roughness: 0.55, metalness: 0, clearcoat: 0.25, clearcoatRoughness: 0.35, envMapIntensity: 0.9 }); coverMats.push(m); return m; };
+function setFinish(gloss) {
+  for (const m of coverMats) { m.roughness = gloss ? 0.32 : 0.6; m.clearcoat = gloss ? 1 : 0.2; m.clearcoatRoughness = gloss ? 0.06 : 0.4; m.envMapIntensity = gloss ? 1.0 : 0.6; m.needsUpdate = true; }
+  document.getElementById('fMate').classList.toggle('primary', !gloss); document.getElementById('fBrillo').classList.toggle('primary', gloss);
+  try { localStorage.setItem('mocaa-acabado', gloss ? 'brillo' : 'mate'); } catch (e) {}
+}
+
+// ---------- cubierta: contracubierta fija, lomo y portada articulados ----------
+const book = new THREE.Group(); scene.add(book);
+const frontTex = tex('pages/cover_front.jpg', false), backTex = tex('pages/cover_back.jpg', false), spineTex = tex('pages/cover_spine.jpg', false);
+// contracubierta: el arte queda en la cara inferior; se ve al voltear el libro
+const backMats = [boardEdge, boardEdge, paper, coverMat(backTex), boardEdge, boardEdge];
+const Bg = new THREE.Group(); Bg.position.set(0, -CV, 0); book.add(Bg);         // bisagra de la contracubierta en el canto inferior del lomo
+const backCover = new THREE.Mesh(new THREE.BoxGeometry(W, CV, H), backMats); backCover.position.set(W / 2, CV / 2, 0); backCover.castShadow = true; backCover.receiveShadow = true; Bg.add(backCover);
+// la textura de la cara inferior se ve desde abajo: hay que espejarla en x para que lea bien al voltear el libro
+backTex.center.set(0.5, 0.5); backTex.rotation = Math.PI;
+
+const G = new THREE.Group(); G.position.set(0, -CV, 0); book.add(G);           // gira sobre el canto inferior del lomo
+const spineMats = [boardEdge, coverMat(spineTex), boardEdge, boardEdge, boardEdge, boardEdge];
+const spine = new THREE.Mesh(new THREE.BoxGeometry(0.04, TS, H), spineMats); spine.position.set(-0.02, TS / 2, 0); spine.castShadow = true; G.add(spine);
+const Cg = new THREE.Group(); Cg.position.set(0, TS, 0); G.add(Cg);              // bisagra de la portada en el canto superior del lomo
+const frontMats = [boardEdge, boardEdge, coverMat(frontTex), paper, boardEdge, boardEdge];
+const frontCover = new THREE.Mesh(new THREE.BoxGeometry(W, CV, H), frontMats); frontCover.position.set(W / 2, -CV / 2, 0); frontCover.castShadow = true; frontCover.receiveShadow = true; Cg.add(frontCover);
+
+// ---------- bloques de hojas (dan cuerpo y canto al taco de páginas) ----------
+const blockGeo = new THREE.BoxGeometry(1, 1, 1);
+const rightBlock = new THREE.Mesh(blockGeo, [paperEdge, paperEdge, paper, paper, paperEdge, paperEdge]); rightBlock.castShadow = true; rightBlock.receiveShadow = true; book.add(rightBlock);
+const leftBlock = new THREE.Mesh(blockGeo, [paperEdge, paperEdge, paper, paper, paperEdge, paperEdge]); leftBlock.castShadow = true; leftBlock.receiveShadow = true; book.add(leftBlock);
+// Cada hoja va pegada al lomo en un punto distinto: cuando el lomo se aplana, las primeras hojas quedan alineadas
+// con la portada y las últimas con la contracubierta, como en un libro encolado real. openP es el grado de apertura.
+let openP = 0, curK = 0;
+let backP = 0;                                   // cierre de la contracubierta al final del libro (0 abierta, 1 cerrada sobre el taco)
+const openAmt = () => openP * (1 - backP);        // cuánto «respira» el medianil
+const hingeX = i => -openP * TS * ((1 - i / (LEAVES - 1)) + backP * (i / (LEAVES - 1)));
+function setBlocks(k) {
+  curK = k;
+  const hr = Math.max(0, (LEAVES - k) * TH - 0.6 * TH), hl = Math.max(0, k * TH - 0.6 * TH);
+  const xr = k < LEAVES ? hingeX(k) : 0, xl = k > 0 ? hingeX(k - 1) : -openP * TS, xl0 = -openP * TS - W;
+  const gw = openAmt() * GUT_U * W * 0.55;
+  rightBlock.visible = hr > 0.002; rightBlock.scale.set(W - 0.02 - xr - gw, Math.max(hr, 0.001), H - 0.02); rightBlock.position.set((xr + gw + W) / 2, hr / 2, 0);
+  leftBlock.visible = hl > 0.002; leftBlock.scale.set(Math.max(0.01, xl - gw - xl0 - 0.02), Math.max(hl, 0.001), H - 0.02); leftBlock.position.set((xl - gw + xl0) / 2, hl / 2, 0);
+}
+function layoutLeavesX() { for (const lf of leaves) lf.mesh.position.x = hingeX(lf.i); }
+
+// ---------- hojas ----------
+function leafGeometry() {
+  const g = new THREE.BufferGeometry(); const cols = SEG + 1;
+  const pos = new Float32Array(cols * 2 * 3), uv = new Float32Array(cols * 2 * 2), idx = [];
+  for (let r = 0; r < 2; r++) for (let j = 0; j < cols; j++) {
+    const n = r * cols + j; const u = j / SEG;
+    pos[n * 3] = u * W; pos[n * 3 + 1] = 0; pos[n * 3 + 2] = r === 0 ? -H / 2 : H / 2;
+    uv[n * 2] = u; uv[n * 2 + 1] = r === 0 ? 1 : 0;
+  }
+  for (let j = 0; j < SEG; j++) { const a = j, b = j + 1, c = cols + j, d = cols + j + 1; idx.push(a, c, b, b, c, d); }
+  g.setIndex(idx); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+  g.addGroup(0, idx.length, 0); g.addGroup(0, idx.length, 1); g.computeVertexNormals(); return g;
+}
+const leaves = [];
+const yUnread = i => (LEAVES - i) * TH, yRead = i => (i + 1) * TH;
+for (let i = 0; i < LEAVES; i++) {
+  const recto = 2 * i + 1, verso = 2 * i + 2;
+  const lo1 = tex(PAGE_LO(recto), false), lo2 = tex(PAGE_LO(verso), true);
+  const m1 = pageMat(lo1, THREE.FrontSide), m2 = pageMat(lo2, THREE.BackSide);
+  const mesh = new THREE.Mesh(leafGeometry(), [m1, m2]); mesh.castShadow = true; mesh.receiveShadow = true;
+  mesh.position.y = yUnread(i); mesh.renderOrder = 1;
+  book.add(mesh);
+  leaves.push({ i, mesh, m1, m2, lo1, lo2, hi1: null, hi2: null, flipped: false, t: 0, anim: null });
+}
+// ---------- niveles de textura: lo (todas las páginas), hi (pliego actual ±2 hojas) y xl, a 300 ppp,
+// para las dos páginas a la vista cuando la cámara se acerca: así el zoom no pierde nitidez ----------
+const PAGE_XL = i => `pages/xl/p${String(i).padStart(3, '0')}.jpg`;
+const cache = { hi: new Map(), xl: new Map() };
+let wantTier = {}, lastTierKey = '';
+const faceOf = pg => { const lf = leaves[Math.floor((pg - 1) / 2)]; return pg % 2 ? [lf, 'm1', false, lf.lo1] : [lf, 'm2', true, lf.lo2]; };
+function setMap(pg, t) { const [lf, mk] = faceOf(pg); if (lf[mk].map !== t) { lf[mk].map = t; lf[mk].needsUpdate = true; } }
+function loadTier(pg, tier, mirror) {
+  let t = cache[tier].get(pg);
+  if (!t) { t = tex(tier === 'xl' ? PAGE_XL(pg) : PAGE(pg), mirror, tt => { tt.userData.ready = true; if (wantTier[pg] === tier) setMap(pg, tt); }); cache[tier].set(pg, t); }
+  else if (t.userData.ready) setMap(pg, t);
+}
+function refreshTiers(force) {
+  const vis = [2 * k, 2 * k + 1].filter(p => p >= 1 && p <= NPAGES);     // izquierda 2k, derecha 2k+1
+  const close = sph.r < 42;
+  const want = {};
+  for (let d = -2; d <= 2; d++) { const i = k + d; if (i >= 0 && i < LEAVES) { want[2 * i + 1] = 'hi'; want[2 * i + 2] = 'hi'; } }
+  if (close) for (const p of vis) want[p] = 'xl';
+  const key = JSON.stringify(want); if (!force && key === lastTierKey) return; lastTierKey = key; wantTier = want;
+  for (let pg = 1; pg <= NPAGES; pg++) {
+    const tier = want[pg] || 'lo'; const [lf, mk, mirror, lo] = faceOf(pg);
+    if (tier === 'lo') { setMap(pg, lo); continue; }
+    const h = cache.hi.get(pg); if (h && h.userData.ready) setMap(pg, h);
+    loadTier(pg, 'hi', mirror);
+    if (tier === 'xl') loadTier(pg, 'xl', mirror);
+  }
+  prune('xl', 6); prune('hi', 14);
+}
+function prune(tier, max) {
+  const c = cache[tier]; if (c.size <= max) return;
+  for (const [pg, t] of c) { const w = wantTier[pg]; if (w === tier || (tier === 'hi' && w === 'xl')) continue; const [lf, mk] = faceOf(pg); if (lf[mk].map === t) continue; t.dispose(); c.delete(pg); if (c.size <= max) break; }
+}
+const updateHi = () => refreshTiers(true);
+
+// ---------- deformación de la hoja durante el paso ----------
+const ease = x => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+function shapeLeaf(leaf, t, dir) {
+  // t: 0 (en la pila derecha) .. 1 (en la pila izquierda). dir: +1 avanza, -1 retrocede (para el sentido de la curva)
+  const theta = Math.PI * t;
+  const bend = 0.55 * Math.sin(2 * Math.PI * t) * dir;      // la punta se adelanta al despegar y se rezaga al posarse
+  const pos = leaf.mesh.geometry.attributes.position; const cols = SEG + 1; const ds = W / SEG;
+  let x = 0, y = 0, phi = theta;
+  for (let j = 0; j < cols; j++) {
+    const u = j / SEG; phi = theta + bend * u + gutter(u) * (1 - 2 * t) * openAmt();
+    for (let r = 0; r < 2; r++) { const n = r * cols + j; pos.array[n * 3] = x; pos.array[n * 3 + 1] = y; }
+    x += Math.cos(phi) * ds; y += Math.sin(phi) * ds;
+  }
+  pos.needsUpdate = true; leaf.mesh.geometry.computeVertexNormals();
+  leaf.mesh.rotation.z = 0; leaf.mesh.position.x = hingeX(leaf.i);
+  leaf.mesh.position.y = yUnread(leaf.i) + (yRead(leaf.i) - yUnread(leaf.i)) * t;
+}
+// curva del medianil: en un libro encolado las páginas no quedan planas junto al lomo, suben hacia él
+const GUT_A = 0.42, GUT_U = 0.11;                            // ángulo en la bisagra (rad) y tramo afectado (fracción del ancho)
+const gutter = u => u < GUT_U ? GUT_A * Math.pow(1 - u / GUT_U, 2) : 0;
+function restLeaf(leaf) {
+  const pos = leaf.mesh.geometry.attributes.position; const cols = SEG + 1; const ds = W / SEG; const sg = leaf.flipped ? -1 : 1;
+  let x = 0, y = 0;
+  for (let j = 0; j < cols; j++) {
+    const phi = sg * gutter(j / SEG) * openAmt();   // con el libro cerrado las hojas quedan planas
+    for (let r = 0; r < 2; r++) { const n = r * cols + j; pos.array[n * 3] = x; pos.array[n * 3 + 1] = y; }
+    x += Math.cos(phi) * ds; y += Math.sin(phi) * ds;
+  }
+  pos.needsUpdate = true; leaf.mesh.geometry.computeVertexNormals();
+  leaf.mesh.rotation.z = leaf.flipped ? Math.PI : 0; leaf.mesh.position.x = hingeX(leaf.i);
+  leaf.mesh.position.y = leaf.flipped ? yRead(leaf.i) : yUnread(leaf.i);
+}
+
+// ---------- voltear el libro cerrado (contracubierta) ----------
+let flippedOver = false, flipAnim = null;
+function flipOver() {
+  if (!(pos === 0 || pos === LAST) || flipAnim) return;
+  const cx = pos === 0 ? W / 2 : -TS - W / 2;                 // el libro gira sobre su propio centro
+  const from = flippedOver ? 1 : 0, to = 1 - from; const dur = reduce ? 0 : 800; const t0 = performance.now(); flippedOver = !flippedOver; setUI();
+  function f(now) { const u = dur ? Math.min(1, (now - t0) / dur) : 1; const e = ease(u); const p = from + (to - from) * e;
+    book.rotation.z = Math.PI * p; book.position.x = 2 * cx * p; book.position.y = T * p + Math.sin(Math.PI * p) * 6; if (u < 1) { flipAnim = requestAnimationFrame(f); } else { flipAnim = null; } }
+  flipAnim = requestAnimationFrame(f);
+}
+// ---------- estado del libro ----------
+// pos 0 = cerrado por la portada; pos 1 = portada interior y pág. 1; pos p = pliego (2(p-1), 2(p-1)+1);
+// pos 47 = pág. 92 y contracubierta interior; pos 48 = cerrado por la contracubierta
+const LAST = LEAVES + 2;
+let pos = 0, targetOpen = 0, k = 0;   // k = hojas pasadas
+const queue = []; let busy = false;
+const indEl = document.getElementById('ind'), slider = document.getElementById('slider');
+function label(p) {
+  if (p === 0) return 'Portada';
+  if (p === 1) return 'Pág. 1';
+  if (p === LEAVES + 1) return 'Pág. 92';
+  if (p === LAST) return 'Contracubierta';
+  const l = 2 * (p - 1); return `Págs. ${l} – ${l + 1}`;
+}
+function setUI() {
+  indEl.textContent = label(pos); slider.value = pos; document.getElementById('bPrev').disabled = pos === 0; document.getElementById('bNext').disabled = pos === LAST;
+  document.getElementById('bClose').textContent = pos === 0 ? 'Abrir libro' : (pos === LAST ? 'Volver al inicio' : 'Cerrar libro');
+  const bv = document.getElementById('bVolt'); bv.hidden = !(pos === 0 || pos === LAST);
+  const upIsBack = (pos === LAST) !== flippedOver; bv.textContent = upIsBack ? 'Ver portada' : 'Ver contracubierta';
+}
+function placeCovers() {
+  // Fase 1 (openP): el lomo gira sobre su canto derecho (0,-CV) y la portada se tiende a la izquierda.
+  // Fase 2 (backP): el lomo se levanta girando sobre su canto izquierdo (-TS,-CV) y la contracubierta se pliega sobre el taco.
+  const a = openP * Math.PI / 2, b = backP * Math.PI / 2;
+  if (backP <= 0) { G.position.set(0, -CV, 0); G.rotation.z = a; Cg.rotation.z = a; Bg.position.set(0, -CV, 0); Bg.rotation.z = 0; }
+  else {
+    G.position.set(-TS + TS * Math.cos(b), -CV + TS * Math.sin(b), 0); G.rotation.z = Math.PI / 2 + b; Cg.rotation.z = Math.PI / 2 - b;
+    Bg.position.copy(G.position); Bg.rotation.z = 2 * b;
+  }
+}
+function applyOpen(p) { // p 0..1: apertura de la portada (lineal; la suavidad la pone la animación)
+  openP = p; placeCovers(); layoutLeavesX(); setBlocks(curK);
+  for (const lf of leaves) restLeaf(lf);   // la curva del medianil crece con la apertura
+}
+function applyBack(p) { // p 0..1: cierre de la contracubierta sobre el taco de hojas
+  backP = p; placeCovers(); layoutLeavesX(); setBlocks(curK);
+  for (const lf of leaves) restLeaf(lf);
+}
+function setInstant(p) {
+  pos = Math.max(0, Math.min(LAST, p)); k = Math.max(0, Math.min(LEAVES, pos - 1));
+  for (const lf of leaves) { lf.flipped = lf.i < k; }
+  openP = targetOpen = pos > 0 ? 1 : 0; backP = pos === LAST ? 1 : 0; setBlocks(k); applyOpen(openP); updateHi(); setUI();
+}
+function enqueue(op) { queue.push(op); if (!busy) step(); }
+function step() {
+  const op = queue.shift(); if (!op) { busy = false; return; }
+  busy = true;
+  if (op === 'next') {
+    if ((pos === 0 || pos === LAST) && flippedOver) { flipOver(); queue.unshift('next'); setTimeout(step, reduce ? 0 : 850); return; }
+    if (pos === 0) animateOpen(1, () => { pos = 1; setUI(); step(); });
+    else if (pos <= LEAVES) animateLeaf(leaves[pos - 1], +1, () => { pos++; k = pos - 1; setUI(); updateHi(); step(); });
+    else if (pos === LEAVES + 1) animateBack(1, () => { pos = LAST; setUI(); step(); });
+    else step();
+  } else if (op === 'prev') {
+    if ((pos === 0 || pos === LAST) && flippedOver) { flipOver(); queue.unshift('prev'); setTimeout(step, reduce ? 0 : 850); return; }
+    if (pos === LAST) animateBack(0, () => { pos = LEAVES + 1; setUI(); step(); });
+    else if (pos === 1) animateOpen(0, () => { pos = 0; setUI(); step(); });
+    else if (pos > 1) animateLeaf(leaves[pos - 2], -1, () => { pos--; k = pos - 1; setUI(); updateHi(); step(); });
+    else step();
+  } else if (op === 'close') {
+    if (pos === 0) { step(); return; }
+    if (flippedOver) { flipOver(); queue.unshift('close'); setTimeout(step, reduce ? 0 : 850); return; }
+    if (pos === LAST) { queue.unshift('close'); animateBack(0, () => { pos = LEAVES + 1; setUI(); step(); }); return; }
+    // volver al principio pasando las hojas de golpe y cerrando la portada con animación
+    for (const lf of leaves) { lf.flipped = false; restLeaf(lf); } k = 0; setBlocks(0); pos = 1; setUI();
+    animateOpen(0, () => { pos = 0; setUI(); updateHi(); step(); });
+  } else if (typeof op === 'number') {
+    const target = Math.max(0, Math.min(LAST, op));
+    if (target === pos) { step(); return; }
+    if (Math.abs(target - pos) === 1) { queue.unshift(target > pos ? 'next' : 'prev'); step(); return; }
+    // salto largo: colocar todo salvo la última hoja, que se anima
+    if (target === 0) { queue.unshift('close'); step(); return; }
+    if (flippedOver) { flipOver(); queue.unshift(target); setTimeout(step, reduce ? 0 : 850); return; }
+    if (pos === 0) { setInstant(1); }
+    if (pos === LAST) { setInstant(LEAVES + 1); }
+    const before = target > pos ? target - 1 : target + 1;
+    setInstant(before); queue.unshift(target > pos ? 'next' : 'prev'); step();
+  } else step();
+}
+function animateBack(to, cb) {
+  const from = backP; const dur = reduce ? 0 : Math.max(200, 900 * Math.abs(to - from)); const t0 = performance.now();
+  function f(now) { const u = dur ? Math.min(1, (now - t0) / dur) : 1; applyBack(from + (to - from) * ease(u)); if (u < 1) requestAnimationFrame(f); else { applyBack(to); cb(); } }
+  requestAnimationFrame(f);
+}
+function animateOpen(to, cb) {
+  const from = openP; const dur = reduce ? 0 : Math.max(200, 900 * Math.abs(to - from)); const t0 = performance.now();
+  function f(now) { const u = dur ? Math.min(1, (now - t0) / dur) : 1; openP = from + (to - from) * ease(u); applyOpen(openP); if (u < 1) requestAnimationFrame(f); else { openP = to; cb(); } }
+  requestAnimationFrame(f);
+}
+function animateLeaf(leaf, dir, cb, fromT) {
+  // dir +1: la hoja va a la pila izquierda (t -> 1); dir -1: vuelve a la derecha (t -> 0). fromT permite seguir desde un arrastre.
+  const target = dir > 0 ? 1 : 0; const start = fromT === undefined ? 1 - target : fromT;
+  const dur = reduce ? 0 : Math.max(180, 1000 * Math.abs(target - start)); const t0 = performance.now();
+  function f(now) {
+    const u = dur ? Math.min(1, (now - t0) / dur) : 1; const t = start + (target - start) * ease(u);
+    setBlocks(t >= 0.5 ? leaf.i + 1 : leaf.i);
+    if (u < 1) { shapeLeaf(leaf, t, dir); requestAnimationFrame(f); }
+    else { leaf.flipped = dir > 0; restLeaf(leaf); setBlocks(dir > 0 ? leaf.i + 1 : leaf.i); cb(); }
+  }
+  requestAnimationFrame(f);
+}
+
+// ---------- hojear con la mano: agarrar la página por su borde exterior y arrastrarla ----------
+let grab = null;
+const plane0 = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), hitPt = new THREE.Vector3();
+function castAt(cx, cy) { const r = canvas.getBoundingClientRect(); ndc.set(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1); ray.setFromCamera(ndc, camera); }
+function tryGrab(cx, cy) {
+  if (busy || flipAnim || flippedOver) return null;
+  castAt(cx, cy); const hits = ray.intersectObjects(book.children, true); if (!hits.length) return null;
+  const hx = hits[0].point.x, zone = 0.5 * W;                 // mitad exterior de la página
+  if (pos === 0) return hx > zone ? { kind: 'cover', dir: +1, t: 0 } : null;
+  if (pos === LAST) return hx < -TS - zone ? { kind: 'back', dir: -1, t: 1 } : null;          // reabrir por la contracubierta
+  if (hx > zone) return pos <= LEAVES ? { kind: 'leaf', leaf: leaves[pos - 1], dir: +1, t: 0 } : { kind: 'back', dir: +1, t: 0 };
+  if (hx < -zone) return pos === 1 ? { kind: 'cover', dir: -1, t: 1 } : { kind: 'leaf', leaf: leaves[pos - 2], dir: -1, t: 1 };
+  return null;
+}
+function moveGrab(cx, cy) {
+  castAt(cx, cy); if (!ray.ray.intersectPlane(plane0, hitPt)) return;
+  const t = Math.acos(Math.max(-1, Math.min(1, hitPt.x / W))) / Math.PI;   // la punta de la hoja sigue al dedo
+  grab.t = t;
+  if (grab.kind === 'leaf') { shapeLeaf(grab.leaf, t, grab.dir); setBlocks(t >= 0.5 ? grab.leaf.i + 1 : grab.leaf.i); }
+  else if (grab.kind === 'back') applyBack(t);
+  else applyOpen(t);
+}
+function releaseGrab() {
+  const g = grab; grab = null; if (!g) return;
+  const finish = () => { busy = false; setUI(); updateHi(); step(); };
+  if (g.kind === 'leaf') {
+    const lf = g.leaf;
+    if (g.dir > 0) { if (g.t > 0.5) animateLeaf(lf, +1, () => { pos++; k = pos - 1; finish(); }, g.t); else animateLeaf(lf, -1, finish, g.t); }
+    else { if (g.t < 0.5) animateLeaf(lf, -1, () => { pos--; k = pos - 1; finish(); }, g.t); else animateLeaf(lf, +1, finish, g.t); }
+  } else if (g.kind === 'back') {
+    if (g.dir > 0) { if (g.t > 0.5) animateBack(1, () => { pos = LAST; finish(); }); else animateBack(0, finish); }
+    else { if (g.t < 0.5) animateBack(0, () => { pos = LEAVES + 1; finish(); }); else animateBack(1, finish); }
+  } else {
+    if (g.dir > 0) { if (g.t > 0.5) animateOpen(1, () => { pos = 1; finish(); }); else animateOpen(0, finish); }
+    else { if (g.t < 0.5) animateOpen(0, () => { pos = 0; finish(); }); else animateOpen(1, finish); }
+  }
+}
+function cancelGrab() { const g = grab; grab = null; if (!g) return; if (g.kind === 'leaf') { restLeaf(g.leaf); setBlocks(k); } else if (g.kind === 'back') applyBack(g.dir > 0 ? 0 : 1); else applyOpen(g.dir > 0 ? 0 : 1); busy = false; }
+
+// ---------- cámara orbital propia (giro 360°, zoom, desplazamiento) ----------
+const target = new THREE.Vector3(W / 2, 1, 0);
+function bookCenterX() { return pos === 0 ? W / 2 : (pos === LAST ? -TS - W / 2 : -TS / 2); }
+let sph = { r: 78, theta: -0.55, phi: 1.0 };           // radio, acimut, elevación (0 = cenital)
+let want = { r: 78, theta: -0.55, phi: 1.0 }; const wantTarget = target.clone();
+const MINR = 10, MAXR = 220, MINPHI = 0.09, MAXPHI = 1.5;
+function placeCamera() {
+  sph.r += (want.r - sph.r) * 0.18; sph.theta += (want.theta - sph.theta) * 0.18; sph.phi += (want.phi - sph.phi) * 0.18; target.lerp(wantTarget, 0.14);
+  const x = target.x + sph.r * Math.sin(sph.phi) * Math.sin(sph.theta), y = target.y + sph.r * Math.cos(sph.phi), z = target.z + sph.r * Math.sin(sph.phi) * Math.cos(sph.theta);
+  camera.position.set(x, y, z); camera.lookAt(target);
+}
+const ptrs = new Map(); let dragging = false, moved = 0, lastPinch = 0, downAt = 0, lastTap = 0;
+canvas.addEventListener('pointerdown', e => {
+  canvas.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY, b: e.button }); dragging = true; moved = 0; downAt = performance.now(); canvas.classList.add('grabbing');
+  if (ptrs.size === 2) { lastPinch = pinchDist(); if (grab) cancelGrab(); }
+  else if (e.button === 0 && !e.shiftKey) { grab = tryGrab(e.clientX, e.clientY); if (grab) busy = true; }
+});
+canvas.addEventListener('pointermove', e => {
+  if (!ptrs.has(e.pointerId)) return; const p = ptrs.get(e.pointerId); const dx = e.clientX - p.x, dy = e.clientY - p.y; moved += Math.abs(dx) + Math.abs(dy);
+  if (grab && ptrs.size === 1) { if (moved >= 6) moveGrab(e.clientX, e.clientY); }
+  else if (ptrs.size === 1) {
+    if (p.b === 2 || e.shiftKey) pan(dx, dy); else { want.theta -= dx * 0.006; want.phi = Math.max(MINPHI, Math.min(MAXPHI, want.phi - dy * 0.005)); }
+  } else if (ptrs.size === 2) { const d = pinchDist(); if (lastPinch) zoomBy(lastPinch / d); lastPinch = d; }
+  p.x = e.clientX; p.y = e.clientY;
+});
+function endPtr(e) {
+  if (!ptrs.has(e.pointerId)) return; ptrs.delete(e.pointerId);
+  if (ptrs.size === 0) {
+    dragging = false; canvas.classList.remove('grabbing');
+    const isTap = moved < 6 && performance.now() - downAt < 400 && e.button !== 2;
+    if (grab) { if (isTap) { cancelGrab(); tap(e.clientX, e.clientY); } else releaseGrab(); }
+    else if (isTap) tap(e.clientX, e.clientY);
+  }
+  lastPinch = 0;
+}
+canvas.addEventListener('pointerup', endPtr); canvas.addEventListener('pointercancel', endPtr);
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+canvas.addEventListener('wheel', e => { e.preventDefault(); zoomBy(Math.exp(e.deltaY * 0.0012)); }, { passive: false });
+function pinchDist() { const a = [...ptrs.values()]; return Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y); }
+function zoomBy(f) { want.r = Math.max(MINR, Math.min(MAXR, want.r * f)); }
+function pan(dx, dy) { const s = want.r * 0.0011; const right = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0), fwd = new THREE.Vector3(); camera.getWorldDirection(fwd); right.crossVectors(fwd, up).normalize(); const flat = new THREE.Vector3(fwd.x, 0, fwd.z).normalize(); wantTarget.addScaledVector(right, -dx * s).addScaledVector(flat, dy * s); }
+
+// clic sobre el libro: la mitad derecha avanza, la izquierda retrocede; doble clic alterna la vista de lectura
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+function tap(cx, cy) {
+  const now = performance.now(); const dbl = now - lastTap < 350; lastTap = now;
+  if (dbl) { toggleReading(); return; }
+  const r = canvas.getBoundingClientRect(); ndc.set(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1); ray.setFromCamera(ndc, camera);
+  const hits = ray.intersectObjects(book.children, true); if (!hits.length) return;
+  const hx = hits[0].point.x;
+  if (pos === 0) { enqueue('next'); return; }
+  if (pos === LAST) { enqueue('prev'); return; }
+  if (hx >= 0) enqueue('next'); else enqueue('prev');
+}
+let reading = false;
+function viewReading() { reading = true; want.phi = MINPHI; want.theta = 0; want.r = (pos === 0 || pos === LAST) ? 46 : 58; wantTarget.set(bookCenterX(), 0, 0); }
+function view3d() { reading = false; want.phi = 1.0; want.theta = -0.55; want.r = 78; wantTarget.set(bookCenterX(), 1, 0); }
+function toggleReading() { if (reading) view3d(); else viewReading(); }
+document.getElementById('vLect').onclick = viewReading; document.getElementById('v3d').onclick = view3d;
+document.getElementById('vFull').onclick = () => { const el = document.documentElement; const p = document.fullscreenElement ? document.exitFullscreen() : (el.requestFullscreen ? el.requestFullscreen() : Promise.reject()); if (p && p.catch) p.catch(() => {}); };
+document.getElementById('bNext').onclick = () => enqueue('next');
+document.getElementById('bPrev').onclick = () => enqueue('prev');
+document.getElementById('bClose').onclick = () => enqueue(pos === 0 ? 'next' : 'close');
+document.getElementById('bVolt').onclick = flipOver;
+document.getElementById('fMate').onclick = () => setFinish(false); document.getElementById('fBrillo').onclick = () => setFinish(true);
+(() => { let g = false; try { g = localStorage.getItem('mocaa-acabado') === 'brillo'; } catch (e) {} setFinish(g); })();
+slider.addEventListener('input', () => { enqueue(parseInt(slider.value, 10)); });
+addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === 'PageDown') { enqueue('next'); e.preventDefault(); } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { enqueue('prev'); e.preventDefault(); } else if (e.key === 'Home') enqueue(0); else if (e.key === 'End') enqueue(LAST); });
+
+// el centro de la mesa sigue al libro cuando se abre o se cierra
+let lastOpenSeen = -1;
+function followBook() { const ox = bookCenterX(); if (lastOpenSeen !== ox) { wantTarget.x = ox; lastOpenSeen = ox; } }
+
+// ---------- tema ----------
+function applyTheme() {
+  const cs = getComputedStyle(document.documentElement); const sc = cs.getPropertyValue('--scene').trim(), tb = cs.getPropertyValue('--table').trim();
+  scene.background = new THREE.Color(sc); tableMat.color.set(tb); scene.fog = new THREE.Fog(new THREE.Color(sc), 160, 420);
+  ruler.material.opacity = 0.85;
+}
+applyTheme(); matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+// ---------- tamaño y bucle ----------
+function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; if (canvas.width !== Math.floor(w * renderer.getPixelRatio()) || canvas.height !== Math.floor(h * renderer.getPixelRatio())) { renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); } }
+let lastTierCheck = 0;
+function loop(now) { resize(); followBook(); placeCamera(); if (!busy && now - lastTierCheck > 250) { lastTierCheck = now; refreshTiers(false); } renderer.render(scene, camera); requestAnimationFrame(loop); }
+setInstant(0); updateHi();
+requestAnimationFrame(loop);
+})();
+</script>
+</body></html>
