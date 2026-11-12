@@ -40,7 +40,7 @@ canvas#c.grabbing{cursor:grabbing}
   <div class="hud top">
     <div class="title">
       <h1>Colección MoCAA en Yucatán · maqueta 3D</h1>
-      <p><b>Tamaño real:</b> 20,96 × 27,94 cm (8,25 × 11 in) · 90 páginas · lomo 5,4 mm · papel blanco 60# · cubierta cartulina 10 pt laminada<span class="ext"><br>Arrastra fuera del libro para girarlo, rueda o pellizco para acercar; agarra una página por el borde y pásala con la mano.</span></p>
+      <p><b>Tamaño real:</b> 20,96 × 27,94 cm (8,25 × 11 in) · 92 páginas · lomo 5,5 mm · papel blanco 60# · cubierta cartulina 10 pt laminada<span class="ext"><br>Arrastra fuera del libro para girarlo, rueda o pellizco para acercar; agarra una página por el borde y pásala con la mano.</span></p>
     </div>
     <div class="views">
       <span class="btn" style="cursor:default;gap:8px" title="Laminado de la cubierta, se elige al subir el libro a KDP">Cubierta:
@@ -55,7 +55,7 @@ canvas#c.grabbing{cursor:grabbing}
       <button class="btn" id="bClose">Cerrar libro</button>
       <button class="btn" id="bVolt">Ver contracubierta</button>
       <button class="btn" id="bPrev" aria-label="Página anterior">◀ Anterior</button>
-      <input type="range" id="slider" min="0" max="47" value="0" step="1" aria-label="Posición en el libro">
+      <input type="range" id="slider" min="0" max="48" value="0" step="1" aria-label="Posición en el libro">
       <button class="btn primary" id="bNext" aria-label="Página siguiente">Siguiente ▶</button>
       <span class="ind" id="ind">Portada</span>
     </div>
@@ -68,8 +68,8 @@ canvas#c.grabbing{cursor:grabbing}
 (function(){
 'use strict';
 // ---------- medidas reales (cm) ----------
-const W = 20.955, H = 27.94, NPAGES = 90, LEAVES = NPAGES / 2, VER = '?v=3';
-const TH = 0.5365 / LEAVES;          // grosor de cada hoja (lomo KDP 0,2112 in para 90 pp. color premium)
+const W = 20.955, H = 27.94, NPAGES = 92, LEAVES = NPAGES / 2, VER = '?v=6';
+const TH = 0.5485 / LEAVES;          // grosor de cada hoja (lomo KDP 0,2159 in para 92 pp. color premium)
 const CV = 0.03;                     // grosor de la cartulina de cubierta (10 pt)
 const T = LEAVES * TH;               // grosor del bloque de hojas
 const TS = T + 2 * CV;               // ancho del lomo
